@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jamx AI</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500&family=Roboto:wght@400;500&family=Roboto+Mono&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
+    <link rel="icon" type="image/x-icon" href="ai.ico">
+    <style>
+        /* Using Material Design elevation tokens */
+        :root {
+            --md-elevation-level1: 0 1px 2px rgba(0,0,0,0.3);
+            --md-elevation-level2: 0 2px 4px rgba(0,0,0,0.3);
+            --md-elevation-level3: 0 4px 8px rgba(0,0,0,0.3);
+        }
+
+        .profile-container {
+            position: fixed;
+            top: var(--md-sys-spacing-3);
+            right: var(--md-sys-spacing-3);
+            z-index: var(--md-sys-z-index-modal);
+        }
+
+        .profile-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: var(--md-sys-shape-corner-full);
+            cursor: pointer;
+            transition: transform var(--md-sys-motion-duration-short2);
+            object-fit: cover;
+        }
+
+        .profile-icon:hover {
+            transform: scale(1.1);
+        }
+
+        .welcome-message {
+            text-align: center;
+            padding: var(--md-sys-spacing-3);
+            margin: 0 auto;
+            max-width: 95%;
+            animation: fadeIn var(--md-sys-motion-duration-medium1) var(--md-sys-motion-easing-standard);
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: var(--md-sys-spacing-3);
+            max-width: 1200px;
+            margin: var(--md-sys-spacing-3) auto;
+            padding: 0 var(--md-sys-spacing-3);
+        }
+
+        .feature-card {
+            background-color: var(--md-sys-color-surface-container);
+            border-radius: var(--md-sys-shape-corner-medium);
+            padding: var(--md-sys-spacing-3);
+            text-align: center;
+            transition: all var(--md-sys-motion-duration-medium1) var(--md-sys-motion-easing-standard);
+            box-shadow: var(--md-elevation-level1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature-card:hover {
+            box-shadow: var(--md-elevation-level2);
+            transform: translateY(-4px);
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--md-sys-color-primary);
+            opacity: 0;
+            transition: opacity var(--md-sys-motion-duration-short2);
+        }
+
+        .feature-card:hover::before {
+            opacity: 1;
+        }
+
+        .feature-card .material-icons,
+        .feature-card .material-symbols-outlined {
+            font-size: 2.5rem;
+            margin-bottom: var(--md-sys-spacing-3);
+            color: var(--md-sys-color-primary);
+            background: var(--md-sys-color-primary-container);
+            width: 56px;
+            height: 56px;
+            border-radius: var(--md-sys-shape-corner-large);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .feature-card h3 {
+            margin: var(--md-sys-spacing-2) 0;
+            color: var(--md-sys-color-on-surface);
+            font-size: var(--md-sys-typescale-title-medium-size);
+            font-weight: var(--md-sys-typescale-title-medium-weight);
+        }
+
+        .feature-card p {
+            margin: 0;
+            color: var(--md-sys-color-on-surface-variant);
+            font-size: var(--md-sys-typescale-body-medium-size);
+            line-height: var(--md-sys-typescale-body-medium-line-height);
+        }
+
+        .settings-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: var(--md-sys-z-index-modal);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .settings-content {
+            background: var(--md-sys-color-surface);
+            border-radius: var(--md-sys-shape-corner-large);
+            width: 95%;
+            max-width: 560px;
+            max-height: 90vh;
+            overflow-y: auto;
+            margin: var(--md-sys-spacing-3);
+            box-shadow: var(--md-elevation-level2);
+        }
+
+        .settings-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: var(--md-sys-spacing-3);
+            border-bottom: 1px solid var(--md-sys-color-outline-variant);
+            position: sticky;
+            top: 0;
+            background: var(--md-sys-color-surface);
+            z-index: 1;
+        }
+
+        .settings-header h2 {
+            margin: 0;
+            font-size: var(--md-sys-typescale-title-large-size);
+            font-weight: var(--md-sys-typescale-title-large-weight);
+            color: var(--md-sys-color-on-surface);
+        }
+
+        .close-button {
+            background: none;
+            border: none;
+            padding: var(--md-sys-spacing-2);
+            cursor: pointer;
+            color: var(--md-sys-color-on-surface);
+            border-radius: var(--md-sys-shape-corner-full);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color var(--md-sys-motion-duration-short2);
+        }
+
+        .close-button:hover {
+            background-color: var(--md-sys-color-surface-container-highest);
+        }
+
+        .settings-body {
+            padding: var(--md-sys-spacing-3);
+            overflow-y: auto;
+        }
+
+        .settings-section {
+            margin-bottom: var(--md-sys-spacing-4);
+        }
+
+        .settings-section h3 {
+            color: var(--md-sys-color-on-surface);
+            margin-bottom: var(--md-sys-spacing-3);
+            font-size: var(--md-sys-typescale-title-small-size);
+            font-weight: var(--md-sys-typescale-title-small-weight);
+        }
+
+        .settings-section label {
+            color: var(--md-sys-color-on-surface);
+            margin-right: var(--md-sys-spacing-3);
+        }
+
+        .settings-section select {
+            background: var(--md-sys-color-surface-container);
+            color: var(--md-sys-color-on-surface);
+            padding: var(--md-sys-spacing-2);
+            border-radius: var(--md-sys-shape-corner-small);
+            border: 1px solid var(--md-sys-color-outline);
+            cursor: pointer;
+            width: 100%;
+            max-width: 200px;
+        }
+
+        .segmented-button-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--md-sys-spacing-2);
+            margin: var(--md-sys-spacing-2) 0;
+        }
+
+        .segmented-button {
+            padding: var(--md-sys-spacing-2) var(--md-sys-spacing-4);
+            background: var(--md-sys-color-surface-container);
+            border: 1px solid var(--md-sys-color-outline);
+            color: var(--md-sys-color-on-surface-variant);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 200ms var(--md-sys-motion-easing-standard);
+            border-radius: 20px;
+        }
+        .segmented-button.selected {
+            background-color: var(--md-sys-color-primary-container);
+            color: var(--md-sys-color-primary);
+            border-color: var(--md-sys-color-primary);
+        }
+        .segmented-button:hover:not(.selected) {
+            background-color: var(--md-sys-color-surface-container-highest);
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+
+        /* Folding phone - unfolded (280px and up) */
+        @media screen and (min-width: 280px) {
+            .features-grid {
+                grid-template-columns: 1fr;
+                gap: 0.75rem;
+                padding: 0 0.75rem;
+            }
+            .welcome-message {
+                padding: 0.75rem;
+            }
+            .feature-card {
+                padding: 0.75rem;
+            }
+            .feature-card .material-icons,
+            .feature-card .material-symbols-outlined {
+                font-size: 2rem;
+                width: 48px;
+                height: 48px;
+            }
+            .feature-card h3 {
+                font-size: 1.1rem;
+            }
+            .settings-content {
+                width: 100%;
+                margin: 0.75rem;
+            }
+        }
+
+        /* Regular phone (360px and up) */
+        @media screen and (min-width: 360px) {
+            .features-grid {
+                gap: 1rem;
+                padding: 0 1rem;
+            }
+            .welcome-message {
+                padding: 1rem;
+            }
+            .feature-card {
+                padding: 1rem;
+            }
+            .feature-card .material-icons,
+            .feature-card .material-symbols-outlined {
+                font-size: 2.25rem;
+                width: 52px;
+                height: 52px;
+            }
+            .feature-card h3 {
+                font-size: 1.2rem;
+            }
+            .settings-content {
+                margin: 1rem;
+            }
+        }
+
+        /* Tablet/Desktop (768px and up) */
+        @media screen and (min-width: 768px) {
+            .features-grid {
+                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+                gap: 1.5rem;
+                padding: 0 2rem;
+            }
+            .welcome-message {
+                padding: 2rem;
+            }
+            .feature-card {
+                padding: 1.5rem;
+            }
+            .feature-card .material-icons,
+            .feature-card .material-symbols-outlined {
+                font-size: 2.5rem;
+                width: 56px;
+                height: 56px;
+            }
+            .feature-card h3 {
+                font-size: 1.25rem;
+            }
+            .settings-content {
+                width: 95%;
+                max-width: 560px;
+                margin: 2rem;
+                border-radius: 28px;
+            }
+        }
+
+        /* Message styles with responsive adjustments */
+        .message {
+            display: flex;
+            gap: 12px;
+            padding: 1rem;
+            margin: 0.5rem 0;
+            border-radius: 12px;
+            background: var(--md-sys-color-surface-container);
+            animation: fadeIn 200ms ease-in-out;
+        }
+        .message.user {
+            background: var(--md-sys-color-primary-container);
+        }
+        .message-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        .message-content {
+            flex: 1;
+        }
+        .message-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 4px;
+        }
+        .message-name {
+            font-weight: 500;
+            color: var(--md-sys-color-on-surface);
+        }
+        .message-text {
+            color: var(--md-sys-color-on-surface);
+            line-height: 1.5;
+            white-space: pre-wrap;
+        }
+        .message.user .message-text {
+            color: var(--md-sys-color-on-surface);
+        }
+
+        /* Chat input styles */
+        .chat-container {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: center;
+            padding: var(--md-sys-spacing-2);
+            background: var(--md-sys-color-surface);
+            box-shadow: var(--md-elevation-level2);
+        }
+
+        .chat-input-wrapper {
+            display: flex;
+            align-items: center;
+            gap: var(--md-sys-spacing-2);
+            width: 100%;
+            max-width: 768px;
+            background: var(--md-sys-color-surface-container);
+            border-radius: var(--md-sys-shape-corner-large);
+            padding: var(--md-sys-spacing-2);
+        }
+
+        .chat-input {
+            flex: 1;
+            border: none;
+            background: none;
+            padding: var(--md-sys-spacing-1);
+            color: var(--md-sys-color-on-surface);
+            font-family: inherit;
+            font-size: inherit;
+            resize: none;
+            max-height: 120px;
+            min-height: 24px;
+        }
+
+        .chat-input:focus {
+            outline: none;
+        }
+
+        .button {
+            background: none;
+            border: none;
+            padding: var(--md-sys-spacing-2);
+            color: var(--md-sys-color-on-surface-variant);
+            cursor: pointer;
+            border-radius: var(--md-sys-shape-corner-full);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color var(--md-sys-motion-duration-short2);
+        }
+
+        .button:hover {
+            background-color: var(--md-sys-color-surface-container-highest);
+        }
+
+        .send-button {
+            color: var(--md-sys-color-primary);
+        }
+    </style>
+</head>
+<body>
+    <div class="profile-container">
+        <img src="profile.ico" alt="Profile" class="profile-icon" id="profileButton" title="Open Settings">
+    </div>
+    <div class="main-container">
+        <div class="welcome-message">
+            <h1>Welcome to Jamx AI</h1>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <span class="material-symbols-outlined">chat</span>
+                    <h3>Chat Assistant</h3>
+                    <p>Have natural conversations and get help with various tasks</p>
+                </div>
+                <div class="feature-card">
+                    <span class="material-symbols-outlined">description</span>
+                    <h3>File Analysis</h3>
+                    <p>Upload and analyze documents, code, and other files</p>
+                </div>
+                <div class="feature-card">
+                    <span class="material-symbols-outlined">code</span>
+                    <h3>Code Helper</h3>
+                    <p>Get help with coding, debugging, and technical questions</p>
+                </div>
+                <div class="feature-card">
+                    <span class="material-symbols-outlined">psychology</span>
+                    <h3>Smart Analysis</h3>
+                    <p>Receive intelligent insights and recommendations</p>
+                </div>
+            </div>
+        </div>
+        <div id="chat-messages">
+            <!-- Messages will be inserted here -->
+        </div>
+    </div>
+    <div class="chat-container">
+        <div class="chat-input-wrapper">
+            <button class="button" id="attachButton" title="Attach file">
+                <span class="material-symbols-outlined">attach_file</span>
+            </button>
+            <textarea class="chat-input" placeholder="Ask Jamx AI anything..." rows="1" aria-label="Chat input"></textarea>
+            <button class="button send-button" id="sendButton" title="Send message">
+                <span class="material-symbols-outlined">send</span>
+            </button>
+        </div>
+    </div>
+    <div class="settings-modal" id="settingsModal">
+        <div class="settings-content">
+            <div class="settings-header">
+                <h2>Settings</h2>
+                <button class="close-button" id="closeSettings" aria-label="Close settings">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+            <div class="settings-body">
+                <div class="settings-section">
+                    <h3>Theme</h3>
+                    <div class="segmented-button-group">
+                        <button class="segmented-button" data-theme="light">
+                            <span class="material-symbols-outlined">light_mode</span>
+                            Light
+                        </button>
+                        <button class="segmented-button selected" data-theme="dark">
+                            <span class="material-symbols-outlined">dark_mode</span>
+                            Dark
+                        </button>
+                    </div>
+                </div>
+                <div class="settings-section">
+                    <h3>Accent Color</h3>
+                    <div class="segmented-button-group">
+                        <button class="segmented-button selected" data-color="blue">Blue</button>
+                        <button class="segmented-button" data-color="red">Red</button>
+                        <button class="segmented-button" data-color="green">Green</button>
+                        <button class="segmented-button" data-color="orange">Orange</button>
+                        <button class="segmented-button" data-color="cyan">Cyan</button>
+                        <button class="segmented-button" data-color="light-green">Light Green</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script type="module" src="main.js"></script>
+    <script src="settings.js"></script>
+    <script>
+        let currentTheme = localStorage.getItem('theme') || 'dark';
+        let currentColor = localStorage.getItem('color') || 'blue';
+
+        function updateTheme(theme) {
+            document.documentElement.setAttribute('data-theme', theme);
+            localStorage.setItem('theme', theme);
+            currentTheme = theme;
+            
+            const themeButtons = document.querySelectorAll('[data-theme]');
+            themeButtons.forEach(btn => {
+                btn.classList.toggle('selected', btn.dataset.theme === theme);
+            });
+        }
+
+        function updateColor(color) {
+            document.documentElement.setAttribute('data-color', color);
+            localStorage.setItem('color', color);
+            currentColor = color;
+            
+            const colorButtons = document.querySelectorAll('[data-color]');
+            colorButtons.forEach(btn => {
+                btn.classList.toggle('selected', btn.dataset.color === color);
+            });
+        }
+
+        // Initialize theme and color
+        updateTheme(currentTheme);
+        updateColor(currentColor);
+
+        // Theme button listeners
+        document.querySelectorAll('[data-theme]').forEach(button => {
+            button.addEventListener('click', () => {
+                updateTheme(button.dataset.theme);
+            });
+        });
+
+        // Color button listeners
+        document.querySelectorAll('[data-color]').forEach(button => {
+            button.addEventListener('click', () => {
+                updateColor(button.dataset.color);
+            });
+        });
+
+        // Settings modal controls
+        const profileButton = document.getElementById('profileButton');
+        const settingsModal = document.getElementById('settingsModal');
+        const closeSettings = document.getElementById('closeSettings');
+
+        profileButton.addEventListener('click', () => {
+            settingsModal.style.display = 'flex';
+            settingsModal.style.animation = 'fadeIn 200ms ease-in-out';
+        });
+
+        closeSettings.addEventListener('click', () => {
+            settingsModal.style.animation = 'fadeOut 200ms ease-in-out';
+            setTimeout(() => {
+                settingsModal.style.display = 'none';
+            }, 190);
+        });
+
+        settingsModal.addEventListener('click', (e) => {
+            if (e.target === settingsModal) {
+                settingsModal.style.animation = 'fadeOut 200ms ease-in-out';
+                setTimeout(() => {
+                    settingsModal.style.display = 'none';
+                }, 190);
+            }
+        });
+
+        // Auto-resize textarea
+        const textarea = document.querySelector('.chat-input');
+        textarea.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = this.scrollHeight + 'px';
+        });
+
+        // Chat message handling
+        function removeWelcomeMessage() {
+            const welcomeMessage = document.querySelector('.welcome-message');
+            if (welcomeMessage) {
+                welcomeMessage.style.animation = 'fadeOut 200ms ease-in-out';
+                setTimeout(() => {
+                    welcomeMessage.remove();
+                }, 190);
+            }
+        }
+
+        // Message handling moved to main.js
+        const sendButton = document.getElementById('sendButton');
+
+        // Handle send message
+        sendButton.addEventListener('click', () => {
+            const text = textarea.value.trim();
+            if (text) {
+                handleSend();
+            }
+        });
+
+        // Handle enter key
+        textarea.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendButton.click();
+            }
+        });
+    </script>
+</body>
+</html>
