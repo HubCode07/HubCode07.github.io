@@ -180,7 +180,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Function to interact with Gemini API
   async function getAIResponse(prompt, parts = []) {
-    const GEMINI_API_KEY = '';
+    const GEMINI_API_KEY = 'https://github.com/HubCode07/HubCode07.github.io.git';
     const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro-002:generateContent';
 
     try {
